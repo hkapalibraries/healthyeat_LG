@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Resources - Healthy Eating</title>
+    <!-- 使用標準的 Tailwind CSS 載入方式，避免 JIT 腳本在舊版瀏覽器出錯 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* 針對電視瀏覽器優化：改用半透明背景而非模糊，確保效能 */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid #eee;
+        }
+        .book-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #f0f0f0;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        /* 電視瀏覽器對 hover 的處理較敏感，StandbyME 是觸控/遙控器混合，保留簡單反饋 */
+        .book-card:active, .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: #4CAF50;
+        }
+        .filter-btn.active {
+            background-color: #2E7D32 !important;
+            color: white !important;
+            border-color: #2E7D32 !important;
+        }
+        /* QR Code 修正 */
+        .qr-overlay {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 20;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+        /* 隱藏滾動條但保持功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Navigation -->
+    <nav class="glass-header sticky top-0 z-50 py-4 px-6 md:px-12 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2">
+            <div class="bg-green-600 text-white p-2 rounded-lg">
+                <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <span class="font-bold text-xl tracking-tight text-gray-800">HKAPA LIBRARY</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-12 px-6 max-w-7xl mx-auto text-center">
+        <span class="inline-block px-6 py-2 bg-green-50 text-green-700 rounded-full text-sm md:text-lg font-bold mb-4 uppercase tracking-widest">Library Resources 圖書館資源</span>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 text-gray-900 leading-tight">Healthy Eating 健康飲食</h1>
+    </header>
+
+    <!-- Filter Area -->
+    <section class="px-6 max-w-7xl mx-auto mb-10">
+        <div class="flex justify-center bg-gray-50 p-4 rounded-3xl border border-gray-100">
+            <div class="flex gap-3 overflow-x-auto no-scrollbar">
+                <button class="filter-btn active px-6 py-3 rounded-2xl border border-gray-200 text-sm font-semibold whitespace-nowrap bg-white shadow-sm" onclick="filterBooks('all', this)">
+                    全部資源 <span class="block text-[10px] opacity-70 font-normal">All Resources</span>
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-2xl border border-gray-200 text-sm font-semibold whitespace-nowrap bg-white shadow-sm" onclick="filterBooks('Physical Book', this)">
+                    實體書 <span class="block text-[10px] opacity-70 font-normal">Physical Books</span>
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-2xl border border-gray-200 text-sm font-semibold whitespace-nowrap bg-white shadow-sm" onclick="filterBooks('eBook', this)">
+                    電子書 <span class="block text-[10px] opacity-70 font-normal">eBooks</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Book Grid -->
+    <main class="px-6 max-w-7xl mx-auto mb-20">
+        <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- JavaScript will render content here -->
+        </div>
+    </main>
+
+    <script>
+        // 使用標準 JS 語法以提升相容性
+        const bookData = [
+            { title: "Nutrition for the dancer", author: "Mastin, Zerlina.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991001219699704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_6.jpg" },
+            { title: "Nourishing dance : an essential guide", author: "Monika. Saigal.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002340123404326", img: "https://proxy-ap.hosted.exlibrisgroup.com/exl_rewrite/syndetics.com/index.php?client=primo&isbn=9781032432113/lc.jpg" },
+            { title: "史上最完整1000種全食物營養大圖鑑", author: "余素維, 吳思薇.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002020229104326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_7.jpg" },
+            { title: "吃出好膚質：營養師教你從飲食養好肌", author: "潘仕寶.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002014329204326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_8.jpg" },
+            { title: "圖解營養學", author: "侯玉珍.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991001433349704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_9.jpg" },
+            { title: "圖解黃帝內經精華", author: "臧俊岐.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002015229004326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_10.jpg" },
+            { title: "廚房裡的秘密：飲食的科學及文化", author: "徐明達.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991001209869704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_11.jpg" },
+            { title: "沙漏式飲食法", author: "Verburgh, Kris.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991001470059704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_12.jpg" },
+            { title: "總是精神百倍的人，吃的跟你不一樣?", author: "柴崎真木.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002013529704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_13.jpg" },
+            { title: "香港人是時候轉「營」", author: "黃凱詩.", type: "Physical Book", url: "http://lib.hkapa.edu/bib/991002086927804326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_book_5.jpg" },
+            { title: "Eating well for good health", author: "Menza, Valeria.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002120501104326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_18.jpg" },
+            { title: "Food, nutrition and eating behavior", author: "Merrick, Joav.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002120337704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_17.jpg" },
+            { title: "Principles of Food Science", author: "S Chandraprabha", type: "eBook", url: "http://lib.hkapa.edu/bib/991002378154304326", img: "https://m.media-amazon.com/images/I/51szzyf3dHL._SY445_SX342_ML2_.jpg" },
+            { title: "24節氣養生食方", author: "中國養生文化研究中心", type: "eBook", url: "http://lib.hkapa.edu/bib/991002269921504326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_24.jpg" },
+            { title: "不節食更健康", author: "Turner, Pixie.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002172849404326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_26.jpg" },
+            { title: "失控的不是血糖，是你的飲食", author: "講糖教父", type: "eBook", url: "http://lib.hkapa.edu/bib/991002226515204326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_23.jpg" },
+            { title: "從五味看五臟", author: "趙德喜.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002317717704326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_22.jpg" },
+            { title: "超級大腦飲食計畫", author: "Lugavere, Max.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002318167004326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_19.jpg" },
+            { title: "高血脂的中醫保健", author: "林曉軒.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002317813104326", img: "https://libapps-au.s3-ap-southeast-2.amazonaws.com/accounts/216622/images/202409_ebook_21.jpg" },
+            { title: "增肌減脂 蛋白質速查輕圖典", author: "藤田聰著.", type: "eBook", url: "http://lib.hkapa.edu/bib/991002173137004326", img: "https://webcdn2.ebook.hyread.com.tw/bookcover/206084978957658278320201920100335.jpg" }
+        ];
+
+        function handleImageError(img) {
+            img.style.opacity = '0';
+            img.parentElement.style.backgroundColor = '#f3f4f6';
+            // 如果封面載入失敗，顯示一個圖標佔位
+            const icon = document.createElement('div');
+            icon.className = 'absolute inset-0 flex items-center justify-center text-gray-300';
+            icon.innerHTML = '<i class="fa-solid fa-book-open text-4xl"></i>';
+            img.parentElement.appendChild(icon);
+        }
+
+        function renderBooks(data) {
+            const grid = document.getElementById('bookGrid');
+            grid.innerHTML = '';
+            
+            data.forEach(function(book) {
+                const typeColor = book.type === 'eBook' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-700';
+                const icon = book.type === 'eBook' ? 'fa-tablet-screen-button' : 'fa-book';
+                const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(book.url);
+
+                // 使用 <a> 標籤封裝整個卡片，這在電視瀏覽器上最穩定，避免彈出視窗攔截
+                const card = document.createElement('a');
+                card.className = 'book-card bg-white rounded-3xl p-5 shadow-sm';
+                card.href = book.url;
+                card.target = '_blank';
+                
+                card.innerHTML = 
+                    '<div class="relative w-full aspect-[3/4.2] rounded-2xl overflow-hidden shadow-md mb-5 bg-gray-50 border border-gray-100">' +
+                        '<img src="' + book.img + '" alt="cover" class="absolute inset-0 w-full h-full object-cover" onerror="handleImageError(this)">' +
+                        '<div class="qr-overlay">' +
+                            '<img src="' + qrUrl + '" alt="QR" class="w-full h-full">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex-grow">' +
+                        '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3 ' + typeColor + '">' +
+                            '<i class="fa-solid ' + icon + '"></i> ' + book.type +
+                        '</span>' +
+                        '<h3 class="font-bold text-gray-900 line-clamp-2 mb-2 leading-tight text-base md:text-lg h-12">' + book.title + '</h3>' +
+                        '<p class="text-sm text-gray-500 italic mb-1">' + book.author + '</p>' +
+                    '</div>';
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function filterBooks(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            
+            const filtered = bookData.filter(function(book) {
+                return type === 'all' || book.type === type;
+            });
+            renderBooks(filtered);
+        }
+
+        // 初始化
+        window.onload = function() {
+            renderBooks(bookData);
+        };
+    </script>
+</body>
+</html>
